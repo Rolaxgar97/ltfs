@@ -35,6 +35,13 @@ elif [ "$KERNEL_NAME" = "FreeBSD" ]; then
 else
 	if [ -x /usr/bin/genrb ]; then : "${GENRB:=/usr/bin/genrb}"; else : "${GENRB:=genrb}"; fi
 	if [ -x /usr/bin/pkgdata ]; then : "${PKGDATA:=/usr/bin/pkgdata}"; else : "${PKGDATA:=pkgdata}"; fi
+
+	if pkg-config --exists icu-uc 2>/dev/null; then
+		_ICU_LIBDIR=$(pkg-config --variable=libdir icu-uc 2>/dev/null)
+		if [ -f "${_ICU_LIBDIR}/icu/pkgdata.inc" ]; then
+			ICU_PKGDATA_INC="${_ICU_LIBDIR}/icu/pkgdata.inc"
+		fi
+	fi
 fi
 
 if [ "$#" -lt "1" ]; then
