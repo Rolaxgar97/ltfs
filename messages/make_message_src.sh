@@ -33,22 +33,8 @@ elif [ "$KERNEL_NAME" = "FreeBSD" ]; then
 	: "${GENRB:=genrb}"
 	: "${PKGDATA:=/usr/local/bin/pkgdata}"
 else
-	if [ -x /usr/bin/genrb ]; then
-		GENRB=/usr/bin/genrb
-	else
-		GENRB=genrb
-	fi
-	if [ -x /usr/bin/pkgdata ]; then
-		PKGDATA=/usr/bin/pkgdata
-	else
-		PKGDATA=pkgdata
-	fi
-	if pkg-config --exists icu-uc 2>/dev/null; then
-		_ICU_LIBDIR=$(pkg-config --variable=libdir icu-uc 2>/dev/null)
-		if [ -f "${_ICU_LIBDIR}/icu/pkgdata.inc" ]; then
-			ICU_PKGDATA_INC="${_ICU_LIBDIR}/icu/pkgdata.inc"
-		fi
-	fi
+	if [ -x /usr/bin/genrb ]; then : "${GENRB:=/usr/bin/genrb}"; else : "${GENRB:=genrb}"; fi
+	if [ -x /usr/bin/pkgdata ]; then : "${PKGDATA:=/usr/bin/pkgdata}"; else : "${PKGDATA:=pkgdata}"; fi
 fi
 
 if [ "$#" -lt "1" ]; then
@@ -81,10 +67,9 @@ make_obj() {
 	mkdir -p "$WORK"
 
 	# Generate the resource files, then package them statically.
-	${GENRB} -d work -q *.txt
-	cd work
-	ls *.res >packagelist.txt
-	${PKGDATA} ${ICU_PKGDATA_INC:+-O} ${ICU_PKGDATA_INC} -p ${BASENAME} -m static -q packagelist.txt >/dev/null
+	${GENRB} -d "$WORK" -q "${SRC_DIR}"/*.txt
+	( cd "$WORK" && ls *.res > packagelist.txt && \
+	  ${PKGDATA} -p ${BASENAME} -m static -q packagelist.txt >/dev/null )
 
 	case $KERNEL_NAME in
 		MINGW32_NT*)
