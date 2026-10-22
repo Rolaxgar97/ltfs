@@ -74,9 +74,10 @@ make_obj() {
 	mkdir -p "$WORK"
 
 	# Generate the resource files, then package them statically.
-	${GENRB} -d "$WORK" -q "${SRC_DIR}"/*.txt
-	( cd "$WORK" && ls *.res > packagelist.txt && \
-	  ${PKGDATA} -p ${BASENAME} -m static -q packagelist.txt >/dev/null )
+	${GENRB} -d work -q *.txt
+	cd work
+	ls *.res >packagelist.txt
+	${PKGDATA} ${ICU_PKGDATA_INC:+-O} ${ICU_PKGDATA_INC} -p ${BASENAME} -m static -q packagelist.txt >/dev/null
 
 	case $KERNEL_NAME in
 		MINGW32_NT*)
